@@ -11,15 +11,16 @@ const injectContext = PassedComponent => {
 		//this will be passed as the contenxt value
 		const [state, setState] = useState(
 			getState({
-				getStore: () => state.store,
-				getActions: () => state.actions,
-				setStore: updatedStore =>
-					setState({
-						store: Object.assign(state.store, updatedStore),
-						actions: { ...state.actions }
-					})
+			  getStore: () => state.store,
+			  getActions: () => state.actions,
+			  setStore: updatedStore => {
+				const newStore = Object.assign(state.store, updatedStore);
+				if (newStore !== state.store) {
+				  setState({ store: newStore, actions: { ...state.actions } });
+				}
+			  },
 			})
-		);
+		  );
 
 		useEffect(() => {
 			/**
@@ -29,7 +30,9 @@ const injectContext = PassedComponent => {
 			 * store, instead use actions, like this:
 			 **/
 			state.actions.getMessage(); // <---- calling this function from the flux.js actions
+			state.actions.syncTokenFromSessionStore();
 		}, []);
+		
 
 		// The initial value for the context is not null anymore, but the current state of this component,
 		// the context will now have a getStore, getActions and setStore functions available, because they were declared
